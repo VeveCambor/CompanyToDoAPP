@@ -39,7 +39,8 @@
 </template>
 
 <script>
-import db from '../helpers/db.js'
+// import db from '../helpers/db.js'
+import { getProjects, getTasks, getPersons } from '../data/data.js'
 import { isPast } from '../helpers/dateFunctions.js'
 import TPage from '@/components/TPage.vue'
 
@@ -76,20 +77,19 @@ export default {
     }
   },
   created () {
-    const promises = [
-      db.get('js4projects').then((projects) => {
-        this.projects = projects
+    Promise.all([
+      getProjects().then(projects => {
+        this.projects = projects;
       }),
-      db.get('js4tasks').then((tasks) => {
-        this.tasks = tasks
+      getTasks().then(tasks => {
+        this.tasks = tasks;
       }),
-      db.get('js4persons').then((persons) => {
-        this.persons = persons
+      getPersons().then(persons => {
+        this.persons = persons;
       })
-    ]
-    Promise.all(promises).then(() => {
-      this.loading = false
-    })
+    ]).then(() => {
+      this.loading = false;
+    });
   },
   components: {TPage }
 }
@@ -104,15 +104,15 @@ ul
   margin-top: 6rem
   padding: 0
   width: 80%
-  max-width: 400px
-  border: 1px solid #cdcdcd
+  max-width: 550px
+  //border: 1px solid #cdcdcd
   border-radius: $border-radius
   overflow: hidden
   box-shadow: $box-shadow
   & li
-    padding: .4em .8em
+    padding: 1em 1.2em
     &:not(:last-child)
-      border-bottom: 1px solid #efefef
+      border-bottom: 2px solid #efefef
     &:first-child
       font-weight: bold
       background: lighten($secondary, 60%)
