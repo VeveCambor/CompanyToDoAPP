@@ -39,8 +39,7 @@
 </template>
 
 <script>
-// import db from '../helpers/db.js'
-import { getProjects, getTasks, getPersons } from '../data/data.js'
+import db from '../helpers/db.js'
 import { isPast } from '../helpers/dateFunctions.js'
 import TPage from '@/components/TPage.vue'
 
@@ -77,19 +76,20 @@ export default {
     }
   },
   created () {
-    Promise.all([
-      getProjects().then(projects => {
-        this.projects = projects;
+    const promises = [
+      db.get('js4projects').then((projects) => {
+        this.projects = projects
       }),
-      getTasks().then(tasks => {
-        this.tasks = tasks;
+      db.get('js4tasks').then((tasks) => {
+        this.tasks = tasks
       }),
-      getPersons().then(persons => {
-        this.persons = persons;
+      db.get('js4persons').then((persons) => {
+        this.persons = persons
       })
-    ]).then(() => {
-      this.loading = false;
-    });
+    ]
+    Promise.all(promises).then(() => {
+      this.loading = false
+    })
   },
   components: {TPage }
 }
