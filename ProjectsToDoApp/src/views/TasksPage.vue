@@ -43,7 +43,7 @@
 
 <script>
 
-import db from '../helpers/db.js'
+import { db } from '../helpers/db.js'
 import { isPast, formatDate } from '../helpers/dateFunctions.js'
 import { sortingTasks } from '@/helpers/sorting.js'
 import TAccordeon from '../components/TAccordeon.vue'
@@ -94,12 +94,26 @@ export default {
     this.fetchData()
   },
   methods: {
-    fetchData () {
-      const promises = [
-        db.get('js4tasks').then(tasks => { this.tasks = tasks }),
-        db.get('js4personstasks').then(persons => { this.persons = persons })
-      ]
-      Promise.all(promises).then(() => { this.loading = false })
+    async fetchData () {
+      this.loading = true;
+      try {
+        const { data: tasks, error: tasksError } = await db
+          .from('tasks')
+          .select('*');
+        if (tasksError) throw tasksError;
+        this.tasks = tasks;
+
+        const { data: persons, error: personsError } = await db
+          .from('personstasks')
+          .select('*');
+        if (personsError) throw personsError;
+        this.persons = persons;
+      } catch (error) {
+        console.error('Error:', error);
+        // Handle the error appropriately
+      } finally {
+        this.loading = false;
+      }
     },
     onDeleteClicked (task) {
       this.taskToDelete = task
@@ -109,12 +123,21 @@ export default {
       this.taskToDelete = {}
       this.showDeleteModal = false
     },
-    deleteTask () {
-      db.delete('js4tasks', { id: this.taskToDelete.id }).then(() => {
-        this.taskToDelete = {}
-        this.showDeleteModal = false
-        this.fetchData()
-      })
+    async deleteTask () {
+      try {
+        const { error } = await db
+          .from('tasks')
+          .delete()
+          .match({ id: this.taskToDelete.id });
+        if (error) throw error;
+
+        this.taskToDelete = {};
+        this.showDeleteModal = false;
+        await this.fetchData(); // Refresh data
+      } catch (error) {
+        console.error('Error:', error);
+        // Handle the error appropriately
+      }
     },
     formatDate (date) {
       return formatDate(date)

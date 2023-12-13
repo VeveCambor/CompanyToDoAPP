@@ -98,12 +98,12 @@ export default {
     this.fetchData()
   },
   methods: {
-    onDeleteClicked (project) { // { project: 'zahrada', id: 1, tasks: [] }
+    onDeleteClicked (project) {
       this.projectToDelete = project
       this.showDeleteModal = true
     },
     deleteProject () {
-      db.delete('js4projects', { id: this.projectToDelete.id }).then(() => {
+      db.delete('projects', { id: this.projectToDelete.id }).then(() => {
         this.projectToDelete = {}
         this.showDeleteModal = false
         this.fetchData()
@@ -115,10 +115,10 @@ export default {
     },
     fetchData () {
       const promises = [
-        db.get('js4projects').then(projects => {
+        db.get('projects').then(projects => {
           this.projects = projects
         }),
-        db.get('js4tasks').then(tasks => {
+        db.get('tasks').then(tasks => {
           this.tasks = tasks
         })
       ]

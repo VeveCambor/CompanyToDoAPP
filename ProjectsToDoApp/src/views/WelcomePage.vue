@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import db from '../helpers/db.js'
+import { db } from '../helpers/db.js'
 import { isPast } from '../helpers/dateFunctions.js'
 import TPage from '@/components/TPage.vue'
 
@@ -76,22 +76,41 @@ export default {
     }
   },
   created () {
-    const promises = [
-      db.get('js4projects').then((projects) => {
-        this.projects = projects
-      }),
-      db.get('js4tasks').then((tasks) => {
-        this.tasks = tasks
-      }),
-      db.get('js4persons').then((persons) => {
-        this.persons = persons
+    this.loading = true;
+    const fetchProjects = db.from('projects').select('*');
+    const fetchTasks = db.from('tasks').select('*');
+    const fetchPersons = db.from('persons').select('*');
+
+    Promise.all([fetchProjects, fetchTasks, fetchPersons])
+      .then((responses) => {
+        this.projects = responses[0].data;
+        this.tasks = responses[1].data;
+        this.persons = responses[2].data;
       })
-    ]
-    Promise.all(promises).then(() => {
-      this.loading = false
-    })
+      .catch((error) => {
+        console.error('Error:', error);
+        // Handle the error appropriately
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+
+    // const promises = [
+    //   db.get('projects').then((projects) => {
+    //     this.projects = projects
+    //   }),
+    //   db.get('tasks').then((tasks) => {
+    //     this.tasks = tasks
+    //   }),
+    //   db.get('persons').then((persons) => {
+    //     this.persons = persons
+    //   })
+    // ]
+    // Promise.all(promises).then(() => {
+    //   this.loading = false
+    // })
   },
-  components: {TPage }
+  components: { TPage }
 }
 
 </script>
